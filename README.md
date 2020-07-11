@@ -58,7 +58,9 @@ command.
 Enjoy!
 
 
-Deployment
+## Deployment
+
+###Bastion Connection
 - Add cloud_user to the HostAdmins group
 - Generate a new ssh key
 ```

@@ -48,8 +48,8 @@ class KinesisFirehoseStack(core.Stack):
                                    },
                                    redshift_destination_configuration={
                                        "clusterJdbcurl": f"jdbc:redshift://{redshift.cluster_endpoint.hostname}:5439/aml",
-                                       "username": f"{{resolve:secretsmanager:{redshift.cluster_name}:SecretString:username::}}",
-                                       "password": f"{{resolve:secretsmanager:{redshift.cluster_name}:SecretString:password::}}",
+                                       "username": redshift.secret.secret_value_from_json("username").to_string(),
+                                       "password": redshift.secret.secret_value_from_json("password").to_string(),
                                        "copyCommand": {
                                            "copyOptions": "json 'auto'",
                                            "dataTableName": "payments"
