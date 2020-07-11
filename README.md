@@ -56,3 +56,19 @@ command.
  * `cdk docs`        open CDK documentation
 
 Enjoy!
+
+
+Deployment
+- Add cloud_user to the HostAdmins group
+- Generate a new ssh key
+```
+ssh-keygen -t rsa -f mynew_key
+```
+- Propogate the ssh key to the new bastion host
+```
+aws ec2-instance-connect send-ssh-public-key --region ${REGION} --instance-id ${INSTANCE_ID} --availability-zone ${INSTANCE_AZ} --instance-os-user ec2-user --ssh-public-key file://mynew_key.pub
+```
+- Connect to the bastion host
+```
+ssh -i mynew_key ec2-user@ec${IP}.compute-1.amazonaws.com
+```
