@@ -27,7 +27,7 @@ class VpcStack(core.Stack):
                         name="ECS",
                         cidr_mask=24
                     ), ec2.SubnetConfiguration(
-                        subnet_type=ec2.SubnetType.ISOLATED,
+                        subnet_type=ec2.SubnetType.PUBLIC,
                         name="DBS",
                         cidr_mask=24
                     )

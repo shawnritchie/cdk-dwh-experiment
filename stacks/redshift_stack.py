@@ -64,6 +64,7 @@ class RedshiftStack(core.Stack):
                                          vpc_subnets=ec2.SubnetSelection(subnet_group_name="DBS")
                                          )
 
+
     def redshift_sg(self, vpc):
         private_security_group = ec2.SecurityGroup(self,
                                                    id='redshift_security_group',
@@ -74,7 +75,15 @@ class RedshiftStack(core.Stack):
                                                 ec2.Port.tcp(5439),
                                                 'allow all vpc traffic'
                                                 )
+        private_security_group.add_ingress_rule(ec2.Peer.ipv4('52.70.63.192/27'),
+                                                ec2.Port.tcp(5439),
+                                                'VPC Access to an Amazon Redshift Cluster'
+                                                )
         private_security_group.add_egress_rule(ec2.Peer.ipv4(vpc.vpc_cidr_block),
+                                               ec2.Port.all_traffic(),
+                                               'allow all internal requests'
+                                               )
+        private_security_group.add_egress_rule(ec2.Peer.ipv4('52.70.63.192/27'),
                                                ec2.Port.all_traffic(),
                                                'allow all internal requests'
                                                )

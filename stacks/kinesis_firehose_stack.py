@@ -2,6 +2,7 @@ from aws_cdk import (
     core,
     aws_iam as iam,
     aws_s3 as s3,
+    aws_kms as kms,
     aws_redshift as redshift,
     aws_kinesis as kinesis,
     aws_kinesisfirehose as firehose
@@ -10,11 +11,11 @@ from aws_cdk import (
 
 class KinesisFirehoseStack(core.Stack):
 
-    def __init__(self, scope: core.Construct, id: str, stream: kinesis.Stream, redshift: redshift.Cluster,
-                 **kwargs) -> None:
+    def __init__(self, scope: core.Construct, id: str, stream: kinesis.Stream, stream_key: kms.Key,
+                 redshift: redshift.Cluster, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
 
-        firehouse_bucket = s3.Bucket(self, "redshiftBucket")
+        firehouse_bucket = s3.Bucket(self, "firehoseBucket")
 
         firehose_role = iam.Role(self,
                                  "firehoseRole",
@@ -23,21 +24,34 @@ class KinesisFirehoseStack(core.Stack):
                                  inline_policies={
                                      "s3Policy": iam.PolicyDocument(statements=[
                                          iam.PolicyStatement(effect=iam.Effect.ALLOW,
-                                                             actions=["s3:*"],
+                                                             actions=["s3:AbortMultipartUpload",
+                                                                      "s3:GetBucketLocation",
+                                                                      "s3:GetObject",
+                                                                      "s3:ListBucket",
+                                                                      "s3:ListBucketMultipartUploads",
+                                                                      "s3:PutObject"],
                                                              resources=[f"{firehouse_bucket.bucket_arn}/*",
                                                                         firehouse_bucket.bucket_arn]
                                                              ),
                                          iam.PolicyStatement(effect=iam.Effect.ALLOW,
-                                                             actions=["kinesis:*"],
+                                                             actions=["kms:*"],
+                                                             resources=[stream_key.key_arn]
+                                                             ),
+                                         iam.PolicyStatement(effect=iam.Effect.ALLOW,
+                                                             actions=["kinesis:DescribeStream",
+                                                                      "kinesis:GetShardIterator",
+                                                                      "kinesis:GetRecords",
+                                                                      "kinesis:ListShards"],
                                                              resources=[stream.stream_arn]
                                                              ),
                                          iam.PolicyStatement(effect=iam.Effect.ALLOW,
-                                                             actions=["kms:*"],
-                                                             resources=["*"]
-                                                             )
+                                                             actions=["logs:putLogEvents"],
+                                                             resources=[f"arn:aws:logs:{self.region}:{self.account}:log-group:*:log-stream:*"]
+                                                             ),
                                      ])
                                  })
 
+        #CDK does not enable loggin from the primitive type has to be done manually
         firehose.CfnDeliveryStream(self,
                                    id,
                                    delivery_stream_name="PaymentStream",
@@ -67,7 +81,6 @@ class KinesisFirehoseStack(core.Stack):
                                        }
                                    }
                                    )
-
 
 # create table payments (
 #   event_created timestamp not null,

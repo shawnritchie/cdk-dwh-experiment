@@ -74,3 +74,16 @@ aws ec2-instance-connect send-ssh-public-key --region ${REGION} --instance-id ${
 ```
 ssh -i mynew_key ec2-user@ec${IP}.compute-1.amazonaws.com
 ```
+
+###Instructions due to shortcoming in CDK 
+- Firehouse logging need to be turned on manually
+- Redshift needs to be enabled publicly manually
+- Redshift Schema needs to be created Manually 
+```
+create table payments (
+  event_created timestamp not null,
+  event_dw_regdate timestamp default GETDATE(),
+  event_type varchar(200) not null,
+  event_json_data varchar(65535) not null
+);
+```
