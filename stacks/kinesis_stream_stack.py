@@ -24,7 +24,8 @@ class KinesisStreamStack(core.Stack):
             iam.PolicyStatement(effect=iam.Effect.ALLOW,
                                 actions=["kms:*"],
                                 resources=['*'],
-                                principals=[iam.AccountPrincipal(account_id=self.account)]
+                                principals=[iam.AccountPrincipal(account_id=self.account),
+                                            iam.ServicePrincipal(service="lambda.amazonaws.com")]
                                 )
         )
 
