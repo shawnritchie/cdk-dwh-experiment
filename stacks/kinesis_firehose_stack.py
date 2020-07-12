@@ -5,7 +5,8 @@ from aws_cdk import (
     aws_kms as kms,
     aws_redshift as redshift,
     aws_kinesis as kinesis,
-    aws_kinesisfirehose as firehose
+    aws_kinesisfirehose as firehose,
+    aws_s3_deployment as s3_deploy
 )
 
 
@@ -16,13 +17,18 @@ class KinesisFirehoseStack(core.Stack):
         super().__init__(scope, id, **kwargs)
 
         firehouse_bucket = s3.Bucket(self, "firehoseBucket")
+        s3_deploy.BucketDeployment(self,
+                                   "firehose-jsonpath",
+                                   destination_bucket=firehouse_bucket,
+                                   sources=[s3_deploy.Source.asset("firehose/")]
+                                   )
 
         firehose_role = iam.Role(self,
                                  "firehoseRole",
                                  assumed_by=iam.ServicePrincipal(service="firehose.amazonaws.com"),
                                  external_id=self.account,
                                  inline_policies={
-                                     "s3Policy": iam.PolicyDocument(statements=[
+                                     "firehosePolicy": iam.PolicyDocument(statements=[
                                          iam.PolicyStatement(effect=iam.Effect.ALLOW,
                                                              actions=["s3:AbortMultipartUpload",
                                                                       "s3:GetBucketLocation",
@@ -46,12 +52,13 @@ class KinesisFirehoseStack(core.Stack):
                                                              ),
                                          iam.PolicyStatement(effect=iam.Effect.ALLOW,
                                                              actions=["logs:putLogEvents"],
-                                                             resources=[f"arn:aws:logs:{self.region}:{self.account}:log-group:*:log-stream:*"]
+                                                             resources=[
+                                                                 f"arn:aws:logs:{self.region}:{self.account}:log-group:*:log-stream:*"]
                                                              ),
                                      ])
                                  })
 
-        #CDK does not enable loggin from the primitive type has to be done manually
+        # CDK does not enable loggin from the primitive type has to be done manually
         firehose.CfnDeliveryStream(self,
                                    id,
                                    delivery_stream_name="PaymentStream",
@@ -66,6 +73,7 @@ class KinesisFirehoseStack(core.Stack):
                                        "password": redshift.secret.secret_value_from_json("password").to_string(),
                                        "copyCommand": {
                                            "copyOptions": "json 'auto'",
+                                           "dataTableColumns": "event_created,event_type,event_json_data",
                                            "dataTableName": "payments"
                                        },
                                        "roleArn": firehose_role.role_arn,
