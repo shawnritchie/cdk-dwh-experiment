@@ -40,10 +40,10 @@ class PaymentSimulationLambdaStack(core.Stack):
                                           handler="payment_activity_simulator.handler",
                                           code=_lambda.Code.from_asset("lambda/"),
                                           role=payment_simulator_role,
-                                          timeout=core.Duration.to_minutes(5)
+                                          timeout=core.Duration.minutes(5)
                                           )
 
-        rule = aws_events.Rule(
+        rule = events.Rule(
             self, "Rule",
             schedule=events.Schedule.cron(
                 minute='3',
