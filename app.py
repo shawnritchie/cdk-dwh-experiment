@@ -8,6 +8,7 @@ from stacks.kinesis_stream_stack import KinesisStreamStack
 from stacks.redshift_stack import RedshiftStack
 from stacks.vpc_stack import VpcStack
 from stacks.payment_simulation_lamba_stack import PaymentSimulationLambdaStack
+from stacks.compute_stack import ComputeStack
 
 app = core.App()
 vpc_stack = VpcStack(app, "vpc-stack", "10.1.0.0/16", env={"region": "us-east-1"})
@@ -24,5 +25,6 @@ payment_simulation_lambda_stack = PaymentSimulationLambdaStack(app,
                                                                kinesis_stream_stack.kinesis_stream,
                                                                kinesis_stream_stack.kinesis_key,
                                                                env={"region": "us-east-1"})
+compute_stack = ComputeStack(app, "compute-stack", env={"region": "us-east-1"})
 
 app.synth()

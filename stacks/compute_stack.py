@@ -13,7 +13,7 @@ class ComputeStack(core.Stack):
         flink_app_repo = ecr.Repository(self,
                                         id,
                                         removal_policy=core.RemovalPolicy.DESTROY,
-                                        repository_name="flinkApp"
+                                        repository_name="payment-digestor"
                                         )
 
         flink_app_repo.add_lifecycle_rule(max_image_count=1)
