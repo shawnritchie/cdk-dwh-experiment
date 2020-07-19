@@ -46,7 +46,7 @@ class PaymentSimulationLambdaStack(core.Stack):
         rule = events.Rule(
             self, "Rule",
             schedule=events.Schedule.cron(
-                minute='3',
+                minute='*',
                 hour='*',
                 month='*',
                 week_day='*',
