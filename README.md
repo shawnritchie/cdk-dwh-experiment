@@ -1,3 +1,20 @@
+###Depolyment instructions
+- Setup you `aws configure` to your account
+- Bootstrap environment using `cdk bootstrap`
+- `cdk deploy vpc-stack bastion-stack redshift-stack kinesis-stream-stack kinesis-firehose-stack compute-stack --require-approval never`
+- Firehouse logging need to be turned on manually
+- Redshift needs to be enabled publicly manually
+- Redshift Schema needs to be created Manually 
+```
+create table payments (
+  event_created timestamp not null,
+  event_dw_regdate timestamp default GETDATE(),
+  event_type varchar(200) not null,
+  event_json_data varchar(65535) not null
+);
+```
+- Once everything in place deploy the lambda `cdk deploy payment-simulation-lambda-stack --require-approval never`
+- Currently the Kinesis Data Analytics Apps needs to be built and installed manually to be automated
 
 # Welcome to your CDK Python project!
 
@@ -75,15 +92,3 @@ aws ec2-instance-connect send-ssh-public-key --region ${REGION} --instance-id ${
 ssh -i mynew_key ec2-user@ec${IP}.compute-1.amazonaws.com
 ```
 
-###Instructions due to shortcoming in CDK 
-- Firehouse logging need to be turned on manually
-- Redshift needs to be enabled publicly manually
-- Redshift Schema needs to be created Manually 
-```
-create table payments (
-  event_created timestamp not null,
-  event_dw_regdate timestamp default GETDATE(),
-  event_type varchar(200) not null,
-  event_json_data varchar(65535) not null
-);
-```
