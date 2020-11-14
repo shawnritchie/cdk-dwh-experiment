@@ -58,7 +58,8 @@ class FlinkStack(core.Stack):
                                                           ),
                                       iam.PolicyStatement(sid="PutCloudwatchLogs",
                                                           effect=iam.Effect.ALLOW,
-                                                          actions=["logs:PutLogEvents"],
+                                                          actions=["logs:PutLogEvents","logs:PutMetricData"],
+
                                                           resources=[
                                                               f"arn:aws:logs:{self.region}:{self.account}:log-group:{flink_log_group.log_group_name}:log-stream:{flink_log_stream.log_stream_name}"
                                                           ]
@@ -115,3 +116,5 @@ class FlinkStack(core.Stack):
                                                                                     cloud_watch_logging_option={
                                                                                         "logStreamArn": flink_log_group_arn
                                                                                     })
+
+

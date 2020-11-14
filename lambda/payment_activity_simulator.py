@@ -6,6 +6,7 @@ import pytz
 import uuid
 from datetime import datetime
 from faker import Faker
+import time
 
 fake = Faker()
 kinesis = boto3.client('kinesis')
@@ -81,6 +82,7 @@ def handler(event, context):
         if cc.card_state == "STOLEN":
             for _ in range(5):
                 push_event(generate_tx(cc))
+                # time.sleep(11)
         else:
             push_event(generate_tx(cc))
 
@@ -89,4 +91,4 @@ def handler(event, context):
         "status": "SUCCESS"
     }
 
-# handler({"requestId": "requestId"}, None)
+handler({"requestId": "requestId"}, None)
